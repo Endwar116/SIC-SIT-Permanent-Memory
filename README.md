@@ -1,3 +1,5 @@
+![Permanent Memory banner](assets/banner.jpg)
+
 # Permanent Memory — Governed Memory Architecture for AI Agents
 # 永久記憶 — 給 AI Agent 的受治理記憶架構
 
