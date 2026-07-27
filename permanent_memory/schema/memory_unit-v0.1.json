@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "memory_unit-v0.1",
+  "title": "Permanent Memory memory_unit v0.1 (Ancestral v1.2 = v1.1 Part 15 + P-1/P-2; VS-9 Phase 1)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "foundational", "memory_kind", "dna", "version", "weight", "storage", "semantic_fold", "provenance", "audit_trail"],
+  "properties": {
+    "id": {"type": "string", "minLength": 8},
+    "foundational": {"type": "boolean"},
+    "memory_kind": {"enum": ["episodic", "semantic", "task", "relational", "anchor"]},
+    "dna": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primitives", "causal_chain", "rarity_score", "relation_density"],
+      "properties": {
+        "primitives": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["entity", "state", "relation", "event", "intent", "task"],
+          "properties": {
+            "entity": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["id", "type", "value"], "properties": {"id": {"type": "string"}, "type": {"type": "string"}, "value": {"type": "string"}}, "additionalProperties": true}},
+            "state": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["dimension", "value"], "additionalProperties": true}},
+            "relation": {"type": "array", "items": {"type": "object", "required": ["from", "to", "type"], "additionalProperties": true}},
+            "event": {"oneOf": [{"type": "null"}, {"type": "array", "items": {"type": "object", "required": ["timestamp", "description"], "additionalProperties": true}}]},
+            "intent": {"oneOf": [{"type": "null"}, {"type": "array", "items": {"type": "object", "required": ["actor", "direction"], "additionalProperties": true}}]},
+            "task": {"oneOf": [{"type": "null"}, {"type": "object", "required": ["id", "title", "deliverable", "status", "created_round"], "additionalProperties": false, "properties": {"id": {"type": "string", "pattern": "^([A-Z]+-)?[A-Z]{1,2}-[1-9][0-9]{0,2}$"}, "title": {"type": "string", "minLength": 1}, "deliverable": {"type": "string", "minLength": 1}, "status": {"enum": ["pending", "in_progress", "completed", "dismissed", "archived"]}, "created_round": {"type": "integer", "minimum": 1}, "owner": {"type": "string"}, "priority": {"type": "string"}}}]}
+          }
+        },
+        "causal_chain": {"type": "array", "items": {"type": "string"}},
+        "rarity_score": {"type": "number", "description": "[UNDEFINED formula] E1 前為 placeholder，不得參與 auto_vault 判定"},
+        "relation_density": {"type": "number", "description": "[UNDEFINED formula] 同上"}
+      }
+    },
+    "version": {
+      "type": "object",
+      "required": ["current_number", "current_label", "branch", "created_at", "updated_at", "history"],
+      "additionalProperties": false,
+      "properties": {
+        "current_number": {"type": "integer", "minimum": 1},
+        "current_label": {"type": "string"},
+        "branch": {"type": "string"},
+        "created_at": {"type": "string"},
+        "updated_at": {"type": "string"},
+        "history": {"type": "array", "items": {"type": "object", "required": ["version_number", "changed_at", "change_summary"], "additionalProperties": true}},
+        "branches": {"type": "array", "description": "Part 14 併發分支（R220 加入）；>2 觸發 overflow lock", "items": {"type": "object", "required": ["branch_id", "base_version", "actor", "created_at"], "additionalProperties": true}},
+        "locked": {"type": "boolean", "description": "branch_overflow 鎖：semantic core 寫入停止，僅 metadata append"}
+      }
+    },
+    "weight": {
+      "type": "object",
+      "required": ["fixed", "dynamic", "combined"],
+      "additionalProperties": false,
+      "properties": {
+        "fixed": {"type": "object", "required": ["value", "set_by", "immutable"], "properties": {"value": {"type": "number"}, "set_by": {"enum": ["human", "system"]}, "reason": {"type": "string"}, "immutable": {"const": true}}, "additionalProperties": true},
+        "dynamic": {"type": "object", "required": ["value", "decay_on_repeat", "decay_rate"], "properties": {"value": {"type": "number"}, "decay_on_repeat": {"type": "boolean"}, "decay_rate": {"type": "number"}, "adjusted_by": {"type": "array"}, "last_adjusted_at": {"type": "string"}}, "additionalProperties": true},
+        "combined": {"type": "number"}
+      }
+    },
+    "storage": {
+      "type": "object",
+      "required": ["layer", "compression_state", "retention_class", "vault_candidate_expires", "integrity_signature"],
+      "additionalProperties": false,
+      "properties": {
+        "layer": {"enum": ["vault", "vault_candidate", "cache", "background"]},
+        "compression_state": {"enum": ["none", "folded", "skeleton_only", "pointer_only"]},
+        "retention_class": {"enum": ["deletable", "protected", "immutable"]},
+        "vault_candidate_expires": {"oneOf": [{"type": "null"}, {"type": "string"}]},
+        "integrity_signature": {"oneOf": [{"type": "null"}, {"type": "object", "required": ["algorithm", "signed_fields", "signature", "signed_at", "signer"], "properties": {"algorithm": {"const": "Ed25519"}, "signed_fields": {"type": "array"}, "signature": {"type": "string"}, "signed_at": {"type": "string"}, "signer": {"enum": ["system", "human"]}, "merkle_leaf_index": {"oneOf": [{"type": "null"}, {"type": "integer"}]}, "checkpoint_ref": {"oneOf": [{"type": "null"}, {"type": "string"}]}}, "additionalProperties": false}]}
+      }
+    },
+    "semantic_fold": {
+      "type": "object",
+      "required": ["original_ref", "fold_summary"],
+      "additionalProperties": false,
+      "properties": {
+        "original_ref": {"oneOf": [{"type": "null"}, {"type": "string", "description": "verbatim_store 位址 segment:seq"}]},
+        "fold_summary": {"type": "object"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "description": "VS-9 ingest 規格 v0.1 §五-1：來源與可見性標籤",
+      "required": ["owner", "source_id"],
+      "additionalProperties": false,
+      "properties": {
+        "owner": {"type": "string"},
+        "source_id": {"type": "string"},
+        "designation_letter": {"type": "string"},
+        "internal_only": {"type": "boolean", "default": false},
+        "handshake_secret": {"type": "boolean", "default": false},
+        "excluded_pending_owner": {"type": "boolean", "default": false},
+        "governance_semantic": {"type": "object", "description": "來源帳的治理欄位原樣保留（如來源 ledger 的 type 欄）"}
+      }
+    },
+    "file_ref": {
+      "type": "array",
+      "description": "增補A P-14；掛 relation(type:file_ref) 之外的頂層便捷視圖，可缺",
+      "items": {"type": "object", "required": ["path", "content_hash", "hash_at", "role"], "properties": {"path": {"type": "string"}, "content_hash": {"type": "string"}, "hash_at": {"type": "string"}, "role": {"enum": ["read", "produced", "modified"]}}, "additionalProperties": false}
+    },
+    "audit_trail": {"type": "array", "maxItems": 10, "items": {"type": "object", "required": ["audit_id", "audit_type", "actor", "timestamp"], "additionalProperties": true}}
+  }
+}

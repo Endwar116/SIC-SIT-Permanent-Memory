@@ -1,0 +1,8 @@
+# 測試沙箱與運行資料
+permanent_memory/data*/
+*.lock
+__pycache__/
+*.pyc
+# 金鑰與真實記憶永不入庫
+**/keys/
+**/*.key
