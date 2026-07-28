@@ -68,7 +68,10 @@ invitation to falsify the proofs.
 ## Deliberately excluded 刻意不包含
 
 - The `rarity_score` / `relation_density` computation methods and all threshold
-  calibration data (private per the specification's public/private boundary)
+  calibration data (private per the specification's public/private boundary).
+  Note: the structural spec constants visible in code (e.g. dedup 0.92/0.85,
+  gate window sizes) are open by design — they define the mechanism, not the
+  private calibration; 程式碼內的規格結構常數為公開設計，私有的是校準方法與數據
 - All real memory data, encryption keys, and third-party agent adapters
 - The full internal specification (a 28-part ancestral document; a public concept
   edition exists separately)
