@@ -50,6 +50,21 @@ pip install -r requirements.txt
 cd permanent_memory && for t in tests_*.py; do python3 "$t"; done
 ```
 
+## Erasure proof — the demo 可證明遺忘展示
+
+Delete one record live, keep four proofs: content unrecoverable; the deleted
+segment's hash chain **still verifies** ("was there ever a record here?" stays
+answerable); every other chain unbroken; the deletion itself leaves audit
+evidence. Maps to GDPR Art.17 + Art.5(2) and NIST 800-88 Purge-level
+cryptographic erase — with honest disclosures in [`COMPLIANCE.md`](COMPLIANCE.md).
+
+```bash
+cd permanent_memory && python3 demo_erasure_proof.py --operator "your name"
+```
+
+Independent review log: [`REVIEWS.md`](REVIEWS.md) — including a standing
+invitation to falsify the proofs.
+
 ## Deliberately excluded 刻意不包含
 
 - The `rarity_score` / `relation_density` computation methods and all threshold
